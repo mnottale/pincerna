@@ -9,5 +9,6 @@
   </PropertyGroup>
 <ItemGroup>
    <ProjectReference Include="../pincerna/pincerna.csproj" />
+   <ProjectReference Include="../appointments/appointments.csproj" />
 </ItemGroup>
 </Project>

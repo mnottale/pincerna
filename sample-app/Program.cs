@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 using pincerna;
+using Appointments;
 
 public class Parrot: IApplication
 {
@@ -21,12 +22,29 @@ public class Parrot: IApplication
     }
 }
 
+public class AppAppointments: IApplication
+{
+    private readonly AppointmentsModel Model = new AppointmentsModel("appointments.json");
+
+    public async Task Converse(IConversation conv)
+    {
+        while (true)
+        {
+            await AppointmentsAgent.Process(Model, conv);
+        }
+    }
+    public void OnNewConversation(IBot bot, IConversation conv)
+    {
+        Task.Factory.StartNew(() => Converse(conv));
+    }
+}
 public class Program
 {
     public static void Main()
     {
         var parrot = new Parrot();
-        var bot = BotFactory.Make(System.IO.File.ReadAllText(".botkey"), parrot);
+        var appts = new AppAppointments();
+        var bot = BotFactory.Make(System.IO.File.ReadAllText(".botkey"), appts);
         bot.Run().Wait();
     }
 }

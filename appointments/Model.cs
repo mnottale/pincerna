@@ -86,6 +86,7 @@ public class AppointmentsModel
                 if (hit == null)
                     return false;
                 hit.Status = SlotState.FREE;
+                hit.Payload.Clear();
                 return true;
             });
     }
@@ -140,6 +141,7 @@ public class AppointmentsModel
             while (cur < intv.end)
             {
                 Model.Add(new Slot { Begin = cur, Status = SlotState.FREE});
+                cur += d;
             }
         }
     }
