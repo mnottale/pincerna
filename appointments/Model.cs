@@ -44,13 +44,30 @@ public class AppointmentsModel
         public SlotState Status;
         public Dictionary<string, string> Payload;
     }
-    public AppointmentsModel(SlotSpec spec)
+    public AppointmentsModel(SlotSpec spec, string persistDir)
     {
+        PersistDir = persistDir;
         BuildModel(spec);
+        Reload();
     }
-    public AppointmentsModel(string specPath)
+    public AppointmentsModel(string specPath, string persistDir)
     {
+        PersistDir = persistDir;
         BuildModel(JsonConvert.DeserializeObject<SlotSpec>(System.IO.File.ReadAllText(specPath)));
+        Reload();
+    }
+    private void Reload()
+    {
+        foreach (var f in System.IO.Directory.GetFiles(PersistDir))
+        {
+            var j = System.IO.File.ReadAllText(f);
+            var d = JsonConvert.DeserializeObject<Slot>(j);
+            var hit = Model.Where(x => x.Begin == d.Begin).FirstOrDefault();
+            if (hit == null)
+                throw new Exception($"Reloading {f} error, hit not found");
+            hit.Status = d.Status;
+            hit.Payload = d.Payload;
+        }
     }
     public BlockedSlot? ReserveFirst()
     {
@@ -87,6 +104,8 @@ public class AppointmentsModel
                     return false;
                 hit.Status = SlotState.FREE;
                 hit.Payload.Clear();
+                var pth = hit.Begin.ToString("s");
+                System.IO.File.Delete($"{PersistDir}/{pth}.json");
                 return true;
             });
     }
@@ -109,6 +128,8 @@ public class AppointmentsModel
                 {
                     hit.Status = SlotState.BOOKED;
                     hit.Payload = payload;
+                    var pth = hit.Begin.ToString("s");
+                    System.IO.File.WriteAllText($"{PersistDir}/{pth}.json", JsonConvert.SerializeObject(hit));
                 }
                 else
                     throw new Exception("Failed to locate slot");
@@ -172,4 +193,5 @@ public class AppointmentsModel
     private readonly List<Slot> Model = new List<Slot>();
     private readonly SemaphoreSlim Lock = new SemaphoreSlim(1, 1);
     private readonly Random Rnd = new Random();
+    private readonly string PersistDir;
 }

@@ -24,13 +24,21 @@ public class Parrot: IApplication
 
 public class AppAppointments: IApplication
 {
-    private readonly AppointmentsModel Model = new AppointmentsModel("appointments.json");
+    private readonly AppointmentsModel Model = new AppointmentsModel("appointments.json", "storage");
 
     public async Task Converse(IConversation conv)
     {
         while (true)
         {
-            await AppointmentsAgent.Process(Model, conv);
+            try
+            {
+                await AppointmentsAgent.Process(Model, conv);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("woops");
+                Console.WriteLine(e.ToString());
+            }
         }
     }
     public void OnNewConversation(IBot bot, IConversation conv)
