@@ -173,7 +173,7 @@ internal class Bot: IBot
                     conv.Lock.Release();
                 }
                 if (notify)
-                    App.OnNewConversation(this, new Conversation(this, new ChatTarget { Id = cid})); 
+                    App.OnNewConversation(this, new Conversation(this, new ChatTarget { Id = cid, Name = u["message"]["chat"]["username"].Value<string>()})); 
                 Offset = u["update_id"].Value<ulong>() + 1;
             }
         }

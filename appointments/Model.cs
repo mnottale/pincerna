@@ -30,6 +30,12 @@ public class BlockedSlot: IDisposable
     }
 }
 
+public class AppointmentsSlot
+{
+    public DateTime Begin;
+    public Dictionary<string, string> Payload;
+}
+
 public class AppointmentsModel
 {
     private enum SlotState
@@ -68,6 +74,12 @@ public class AppointmentsModel
             hit.Status = d.Status;
             hit.Payload = d.Payload;
         }
+    }
+    public List<AppointmentsSlot> Booked(DateTime begin, DateTime end)
+    {
+        return Locked(() => {
+                return Model.Where(x => x.Begin >= begin && x.Begin <= end && x.Status == SlotState.BOOKED).Select(x=> new AppointmentsSlot{Begin=x.Begin, Payload=x.Payload}).ToList();
+        });
     }
     public BlockedSlot? ReserveFirst()
     {

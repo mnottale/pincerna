@@ -144,6 +144,16 @@ public class AppointmentsAgent
                 }
             }
         }
+        else if (cmd.Contains("show"))
+        {
+            var upcoming = Model.Booked(DateTime.Now, DateTime.Now.AddHours(1));
+            var repl = "";
+            foreach (var u in upcoming)
+            {
+                repl += u.Begin.ToString() + ": " + u.Payload["name"] + "\n";
+            }
+            await Conversation.SendAsync(M("Next hour: \n" + repl));
+        }
         else if (cmd.Contains("book"))
         {
             var hit = Model.Find("id", Conversation.Describe().Id.ToString());
@@ -181,7 +191,8 @@ public class AppointmentsAgent
                     txt = msg.Text.Trim().ToLower();
                     if (txt.Contains("yes"))
                     {
-                        book.Book(new Dictionary<string, string>{{"id", Conversation.Describe().Id.ToString()}});
+                        var tgt = Conversation.Describe();
+                        book.Book(new Dictionary<string, string>{{"id", tgt.Id.ToString()}, {"name", tgt.Name}});
                         await Conversation.SendAsync(M(Loc.bookingConfirmed + book.Start.ToString()));
                         break;
                     }
